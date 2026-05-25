@@ -1,7 +1,15 @@
+import {
+  SignUp
+} from "@clerk/clerk-react"
+
 function Register() {
+
   return (
-    <div className="text-4xl font-bold">
-      Register Page
+
+    <div className="min-h-screen bg-black flex items-center justify-center">
+
+      <SignUp />
+
     </div>
   )
 }

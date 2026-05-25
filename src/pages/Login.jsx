@@ -1,7 +1,15 @@
+import {
+  SignIn
+} from "@clerk/clerk-react"
+
 function Login() {
+
   return (
-    <div className="text-4xl font-bold">
-      Login Page
+
+    <div className="min-h-screen bg-black flex items-center justify-center">
+
+      <SignIn />
+
     </div>
   )
 }
