@@ -105,7 +105,7 @@ MongoDB Atlas Database
 ---
 
 ## Sign In Page
-![Sign In](./screenshots/sign-in.png)
+![Sign In](./screenshots/signin.png)
 
 ---
 
