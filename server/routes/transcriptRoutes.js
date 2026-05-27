@@ -8,9 +8,13 @@ const upload = require("../middleware/uploadMiddleware")
 const {
   uploadAudio,
   getTranscripts,
+  deleteTranscript,
 } = require("../controllers/transcriptController")
 
 router.get("/", getTranscripts)
+
+router.delete("/:id", deleteTranscript)
+
 router.post(
   "/upload",
   upload.single("audio"),

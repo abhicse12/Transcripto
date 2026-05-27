@@ -23,7 +23,8 @@ const fileFilter = (req, file, cb) => {
   const allowedTypes = [
     "audio/mpeg",
     "audio/wav",
-    "audio/mp3"
+    "audio/mp3",
+    "audio/webm",
   ]
 
   if (allowedTypes.includes(file.mimetype)) {

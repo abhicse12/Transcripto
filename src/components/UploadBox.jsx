@@ -1,168 +1,346 @@
 import { useState } from "react"
+
 import API from "../api/axios"
+
 import { useUser } from "@clerk/clerk-react"
 
-
 function UploadBox() {
-  const { user } = useUser()
+
   const [audioFile, setAudioFile] = useState(null)
+
   const [loading, setLoading] = useState(false)
 
   const [transcript, setTranscript] = useState("")
+
   const [error, setError] = useState("")
 
+  const { user } = useUser()
+
+  // HANDLE FILE
   const handleFileChange = (e) => {
 
-    const file = e.target.files[0]
-
-    if (!file) return
-
-    // Audio validation
-    if (
-      file.type !== "audio/mpeg" &&
-      file.type !== "audio/wav"
-    ) {
-      alert("Only MP3 and WAV files are allowed")
-      return
-    }
-
-    setAudioFile(file)
+    setAudioFile(e.target.files[0])
   }
 
+  // HANDLE UPLOAD
   const handleUpload = async () => {
 
-  if (!audioFile) {
-    return alert("Please select audio file")
+    if (!audioFile) {
+      return alert("Please select audio file")
+    }
+
+    try {
+
+      setLoading(true)
+
+      setTranscript("")
+
+      setError("")
+
+      const formData = new FormData()
+
+      formData.append("audio", audioFile)
+
+      formData.append("userId", user.id)
+
+      const response = await API.post(
+
+        "/transcript/upload",
+
+        formData
+      )
+
+      setTranscript(response.data.transcript)
+
+    } catch (error) {
+
+      console.log(error)
+
+      setError("Failed to generate transcription")
+
+    } finally {
+
+      setLoading(false)
+    }
   }
 
-  try {
+  // COPY TRANSCRIPT
+  const handleCopy = async () => {
 
-    setLoading(true)
+    try {
 
-    setTranscript("")
+      await navigator.clipboard.writeText(
+        transcript
+      )
 
-    setError("")
+      alert("Transcript copied")
 
-    const formData = new FormData()
+    } catch (error) {
 
-    formData.append("audio", audioFile)
-    formData.append("userId", user.id)
-
-    const response = await API.post(
-      "/transcript/upload",
-      formData
-    )
-
-    setTranscript(response.data.transcript)
-
-  } catch (error) {
-
-    console.log(error)
-
-    setError("Failed to generate transcription")
-
-  } finally {
-
-    setLoading(false)
+      console.log(error)
+    }
   }
-}
 
   return (
-    <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-8 max-w-2xl mx-auto">
 
-      <h2 className="text-3xl font-bold mb-6">
-        Upload Audio
-      </h2>
+    <div className="
+      max-w-5xl
+      mx-auto
+      bg-zinc-900/60
+      backdrop-blur-xl
+      border
+      border-zinc-800
+      rounded-[32px]
+      p-8
+      md:p-12
+      shadow-2xl
+    ">
 
-      <label className="flex flex-col items-center justify-center border-2 border-dashed border-zinc-700 rounded-2xl p-10 cursor-pointer hover:bg-zinc-800 transition">
+      {/* HEADER */}
+      <div className="text-center mb-12">
+
+        <h2 className="
+          text-4xl
+          md:text-5xl
+          font-black
+          mb-5
+        ">
+
+          Upload Audio For
+
+          <span className="
+            bg-gradient-to-r
+            from-purple-400
+            to-blue-400
+            bg-clip-text
+            text-transparent
+          ">
+            {" "}AI Transcription
+          </span>
+
+        </h2>
+
+        <p className="
+          text-zinc-400
+          text-lg
+          max-w-2xl
+          mx-auto
+          leading-8
+        ">
+
+          Upload MP3, WAV or WEBM audio files and generate
+          instant AI-powered transcriptions securely.
+
+        </p>
+
+      </div>
+
+      {/* UPLOAD AREA */}
+      <div className="
+        border-2
+        border-dashed
+        border-zinc-700
+        rounded-3xl
+        p-10
+        text-center
+        bg-black/30
+        hover:border-purple-500/40
+        transition
+      ">
 
         <input
           type="file"
-          accept=".mp3,.wav"
-          className="hidden"
+          accept="audio/*"
           onChange={handleFileChange}
+          className="
+            block
+            w-full
+            text-zinc-400
+            file:mr-4
+            file:py-3
+            file:px-6
+            file:rounded-xl
+            file:border-0
+            file:bg-white
+            file:text-black
+            file:font-semibold
+            hover:file:scale-105
+            file:transition
+            cursor-pointer
+          "
         />
 
-        <p className="text-lg text-zinc-300">
-          Click to Upload Audio
-        </p>
+        {
+          audioFile && (
 
-        <p className="text-sm text-zinc-500 mt-2">
-          MP3 or WAV only
-        </p>
+            <div className="
+              mt-6
+              bg-zinc-900
+              border
+              border-zinc-800
+              rounded-2xl
+              p-5
+            ">
 
-      </label>
+              <p className="text-green-400 font-medium">
+                Selected File
+              </p>
 
+              <p className="text-zinc-300 mt-2">
+                {audioFile.name}
+              </p>
+
+            </div>
+          )
+        }
+
+      </div>
+
+      {/* BUTTON */}
+      <div className="flex justify-center mt-10">
+
+        <button
+          onClick={handleUpload}
+          disabled={loading}
+          className="
+            bg-white
+            text-black
+            px-10
+            py-4
+            rounded-2xl
+            font-bold
+            text-lg
+            hover:scale-105
+            transition
+            disabled:opacity-50
+            disabled:cursor-not-allowed
+            shadow-xl
+          "
+        >
+
+          {
+            loading
+              ? "Generating..."
+              : "Generate Transcript"
+          }
+
+        </button>
+
+      </div>
+
+      {/* LOADING */}
       {
-        audioFile && (
-          <div className="mt-6 bg-black p-4 rounded-xl border border-zinc-800">
+        loading && (
 
-            <p className="text-green-400 font-medium">
-              Selected File:
+          <div className="mt-8 text-center">
+
+            <p className="
+              text-blue-400
+              text-lg
+              animate-pulse
+            ">
+              AI is generating transcription...
             </p>
 
-            <p className="text-zinc-300 mt-1">
-              {audioFile.name}
+          </div>
+        )
+      }
+
+      {/* ERROR */}
+      {
+        error && (
+
+          <div className="
+            mt-8
+            bg-red-500/10
+            border
+            border-red-500/20
+            rounded-2xl
+            p-5
+          ">
+
+            <p className="text-red-400">
+              {error}
             </p>
-            <button
-            onClick={handleUpload}
-            disabled={loading}
-            className="mt-6 bg-white text-black px-6 py-3 rounded-xl font-semibold hover:scale-105 transition"
-            >
-            {
-                loading
-                ? "Uploading..."
-                : "Upload Audio"
-            }
-            </button>
-            {
-            loading && (
 
-                <div className="mt-8 text-center">
+          </div>
+        )
+      }
 
-                <p className="text-blue-400 text-lg animate-pulse">
-                    Generating AI transcription...
+      {/* TRANSCRIPT */}
+      {
+        transcript && (
+
+          <div className="
+            mt-10
+            bg-black/40
+            border
+            border-zinc-800
+            rounded-3xl
+            p-8
+          ">
+
+            <div className="
+              flex
+              flex-col
+              md:flex-row
+              md:items-center
+              md:justify-between
+              gap-4
+              mb-6
+            ">
+
+              <div>
+
+                <h3 className="
+                  text-3xl
+                  font-black
+                ">
+                  AI Transcription
+                </h3>
+
+                <p className="text-zinc-500 mt-2">
+                  Generated successfully
                 </p>
 
-                </div>
-            )
-            }
-            {
-            error && (
+              </div>
 
-                <div className="mt-6 bg-red-500/10 border border-red-500 rounded-2xl p-4">
+              <button
+                onClick={handleCopy}
+                className="
+                  bg-blue-500/10
+                  text-blue-400
+                  border
+                  border-blue-500/20
+                  px-6
+                  py-3
+                  rounded-2xl
+                  hover:bg-blue-500/20
+                  transition
+                "
+              >
+                Copy Transcript
+              </button>
 
-                <p className="text-red-400">
-                    {error}
-                </p>
+            </div>
 
-                </div>
-            )
-            }
-            {
-            transcript && (
+            <div className="
+              bg-zinc-950
+              border
+              border-zinc-800
+              rounded-2xl
+              p-6
+            ">
 
-                <div className="mt-8 bg-black border border-zinc-800 rounded-2xl p-8">
+              <p className="
+                text-zinc-300
+                leading-9
+                whitespace-pre-wrap
+              ">
+                {transcript}
+              </p>
 
-                <div className="flex items-center justify-between mb-6">
-
-                    <h3 className="text-3xl font-bold">
-                    AI Transcription
-                    </h3>
-
-                    <div className="bg-green-500/10 text-green-400 px-4 py-2 rounded-xl border border-green-500/20">
-                    Completed
-                    </div>
-
-                </div>
-
-                <p className="text-zinc-300 leading-8 whitespace-pre-wrap">
-                    {transcript}
-                </p>
-
-                </div>
-            )
-            }
+            </div>
 
           </div>
         )

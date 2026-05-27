@@ -3,6 +3,7 @@ import {
   Routes,
   Route,
 } from "react-router-dom"
+import ProtectedRoute from "./components/ProtectedRoute"
 
 import Navbar from "./components/Navbar"
 
@@ -26,7 +27,14 @@ function App() {
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
-            <Route path="/history" element={<History />} />
+            <Route
+              path="/history"
+              element={
+                <ProtectedRoute>
+                  <History />
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </div>
 

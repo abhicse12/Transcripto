@@ -33,6 +33,10 @@ const uploadAudio = async (req, res) => {
 
     transcriptText: transcript.text,
     })
+    // DELETE TEMP FILE
+    if (fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath)
+    }
 
     res.status(200).json({
 
@@ -75,7 +79,40 @@ const getTranscripts = async (req, res) => {
   }
 }
 
+const deleteTranscript = async (req, res) => {
+
+  try {
+
+    const transcript = await Transcript.findByIdAndDelete(
+      req.params.id
+    )
+
+    if (!transcript) {
+
+      return res.status(404).json({
+        success: false,
+        message: "Transcript not found",
+      })
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Transcript deleted",
+    })
+
+  } catch (error) {
+
+    console.log(error)
+
+    res.status(500).json({
+      success: false,
+      message: "Delete failed",
+    })
+  }
+}
+
 module.exports = {
   uploadAudio,
   getTranscripts,
+  deleteTranscript,
 }
