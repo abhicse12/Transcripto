@@ -1,3 +1,5 @@
+import { useState } from "react"
+
 import { Link, useLocation } from "react-router-dom"
 
 import {
@@ -9,6 +11,8 @@ import {
 function Navbar() {
 
   const location = useLocation()
+
+  const [menuOpen, setMenuOpen] = useState(false)
 
   const navLinks = [
     {
@@ -23,43 +27,17 @@ function Navbar() {
 
   return (
 
-    <nav className="
-      sticky
-      top-0
-      z-50
-      border-b
-      border-zinc-800/50
-      bg-black/70
-      backdrop-blur-xl
-    ">
+    <nav className="sticky top-0 z-50 border-b border-zinc-800/50 bg-black/70 backdrop-blur-xl">
 
-      <div className="
-        max-w-7xl
-        mx-auto
-        px-6
-        py-4
-        flex
-        items-center
-        justify-between
-      ">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
 
         {/* LOGO */}
         <Link
           to="/"
-          className="
-            text-3xl
-            font-black
-            tracking-tight
-          "
+          className="text-2xl sm:text-3xl font-black tracking-tight"
         >
 
-          <span className="
-            bg-gradient-to-r
-            from-purple-400
-            to-blue-400
-            bg-clip-text
-            text-transparent
-          ">
+          <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
             Transcripto
           </span>
 
@@ -69,12 +47,8 @@ function Navbar() {
 
         </Link>
 
-        {/* NAVIGATION */}
-        <div className="
-          flex
-          items-center
-          gap-3
-        ">
+        {/* DESKTOP NAV */}
+        <div className="hidden md:flex items-center gap-3">
 
           {
             navLinks.map((link) => (
@@ -83,11 +57,7 @@ function Navbar() {
                 key={link.path}
                 to={link.path}
                 className={`
-                  px-5
-                  py-2
-                  rounded-xl
-                  transition
-                  font-medium
+                  px-5 py-2 rounded-xl transition font-medium
                   ${
                     location.pathname === link.path
                       ? "bg-zinc-800 text-white"
@@ -105,28 +75,14 @@ function Navbar() {
 
             <Link
               to="/login"
-              className="
-                text-zinc-400
-                hover:text-white
-                transition
-                px-4
-              "
+              className="text-zinc-400 hover:text-white transition px-4"
             >
               Login
             </Link>
 
             <Link
               to="/register"
-              className="
-                bg-white
-                text-black
-                px-5
-                py-2
-                rounded-xl
-                font-semibold
-                hover:scale-105
-                transition
-              "
+              className="bg-white text-black px-5 py-2 rounded-xl font-semibold hover:scale-105 transition"
             >
               Get Started
             </Link>
@@ -136,14 +92,8 @@ function Navbar() {
           {/* LOGGED IN */}
           <SignedIn>
 
-            <div className="
-              ml-3
-              border
-              border-zinc-800
-              rounded-full
-              p-1
-              bg-zinc-900/60
-            ">
+            <div className="ml-3 border border-zinc-800 rounded-full p-1 bg-zinc-900/60">
+
               <UserButton
                 appearance={{
                   elements: {
@@ -154,13 +104,98 @@ function Navbar() {
                   },
                 }}
               />
+
             </div>
 
           </SignedIn>
 
         </div>
 
+        {/* MOBILE MENU BUTTON */}
+        <button
+          onClick={() => setMenuOpen(!menuOpen)}
+          className="md:hidden text-3xl text-white"
+        >
+          {menuOpen ? "✕" : "☰"}
+        </button>
+
       </div>
+
+      {/* MOBILE MENU */}
+      {
+        menuOpen && (
+
+          <div className="md:hidden border-t border-zinc-800 bg-black/95 backdrop-blur-xl px-4 py-6 flex flex-col gap-4">
+
+            {
+              navLinks.map((link) => (
+
+                <Link
+                  key={link.path}
+                  to={link.path}
+                  onClick={() => setMenuOpen(false)}
+                  className={`
+                    px-5 py-3 rounded-xl transition font-medium text-center
+                    ${
+                      location.pathname === link.path
+                        ? "bg-zinc-800 text-white"
+                        : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
+                    }
+                  `}
+                >
+                  {link.name}
+                </Link>
+              ))
+            }
+
+            {/* LOGGED OUT */}
+            <SignedOut>
+
+              <Link
+                to="/login"
+                onClick={() => setMenuOpen(false)}
+                className="text-zinc-400 hover:text-white transition text-center py-2"
+              >
+                Login
+              </Link>
+
+              <Link
+                to="/register"
+                onClick={() => setMenuOpen(false)}
+                className="bg-white text-black px-5 py-3 rounded-xl font-semibold text-center"
+              >
+                Get Started
+              </Link>
+
+            </SignedOut>
+
+            {/* LOGGED IN */}
+            <SignedIn>
+
+              <div className="flex justify-center pt-2">
+
+                <div className="border border-zinc-800 rounded-full p-1 bg-zinc-900/60">
+
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        avatarBox: {
+                          width: "42px",
+                          height: "42px",
+                        },
+                      },
+                    }}
+                  />
+
+                </div>
+
+              </div>
+
+            </SignedIn>
+
+          </div>
+        )
+      }
 
     </nav>
   )

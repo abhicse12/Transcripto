@@ -19,8 +19,10 @@ function Home() {
           absolute
           top-0
           left-1/4
-          w-96
-          h-96
+          w-72
+          sm:w-96
+          h-72
+          sm:h-96
           bg-purple-500/20
           blur-3xl
           rounded-full
@@ -30,8 +32,10 @@ function Home() {
           absolute
           bottom-0
           right-1/4
-          w-96
-          h-96
+          w-72
+          sm:w-96
+          h-72
+          sm:h-96
           bg-blue-500/20
           blur-3xl
           rounded-full
@@ -46,8 +50,10 @@ function Home() {
         items-center
         justify-center
         text-center
-        py-32
-        px-6
+        py-24
+        sm:py-32
+        px-4
+        sm:px-6
       ">
 
         {/* BADGE */}
@@ -62,7 +68,11 @@ function Home() {
           mb-8
         ">
 
-          <p className="text-sm text-zinc-300">
+          <p className="
+            text-xs
+            sm:text-sm
+            text-zinc-300
+          ">
             AI Powered Speech-To-Text Platform
           </p>
 
@@ -70,11 +80,12 @@ function Home() {
 
         {/* TITLE */}
         <h1 className="
-          text-6xl
+          text-5xl
+          sm:text-6xl
           md:text-8xl
           font-black
           leading-tight
-          max-w-6xl
+          max-w-5xl
         ">
 
           Convert Voice Into
@@ -94,10 +105,13 @@ function Home() {
         {/* DESCRIPTION */}
         <p className="
           text-zinc-400
-          text-xl
+          text-base
+          sm:text-lg
+          md:text-xl
           mt-8
           max-w-3xl
-          leading-9
+          leading-8
+          sm:leading-9
         ">
 
           Upload audio or record your voice and generate
@@ -107,9 +121,19 @@ function Home() {
         </p>
 
         {/* BUTTONS */}
-        <div className="flex flex-wrap gap-5 mt-12">
+        <div className="
+          flex
+          flex-col
+          sm:flex-row
+          gap-5
+          mt-12
+          w-full
+          sm:w-auto
+        ">
 
           <button className="
+            w-full
+            sm:w-auto
             bg-white
             text-black
             px-8
@@ -124,6 +148,8 @@ function Home() {
           </button>
 
           <button className="
+            w-full
+            sm:w-auto
             border
             border-zinc-700
             bg-zinc-900/60
@@ -146,9 +172,11 @@ function Home() {
         max-w-7xl
         mx-auto
         grid
+        grid-cols-1
         md:grid-cols-3
         gap-8
-        px-6
+        px-4
+        sm:px-6
         pb-24
       ">
 
@@ -274,11 +302,11 @@ function Home() {
       {/* AUTHENTICATED USER */}
       <SignedIn>
 
-        <div className="pb-20 px-6">
+        <div className="pb-20 px-4 sm:px-6">
           <UploadBox />
         </div>
 
-        <div className="pb-24 px-6">
+        <div className="pb-24 px-4 sm:px-6">
           <Recorder />
         </div>
 
@@ -292,13 +320,23 @@ function Home() {
           py-20
           border-t
           border-zinc-900
+          px-4
         ">
 
-          <h2 className="text-4xl font-bold mb-5">
+          <h2 className="
+            text-3xl
+            sm:text-4xl
+            font-bold
+            mb-5
+          ">
             Login Required
           </h2>
 
-          <p className="text-zinc-400 text-lg">
+          <p className="
+            text-zinc-400
+            text-base
+            sm:text-lg
+          ">
             Please login to upload and transcribe audio.
           </p>
 
