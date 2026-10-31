@@ -241,16 +241,28 @@ function Recorder() {
 
     <section className="card p-5 sm:p-6">
 
-      <h2 className="text-lg font-semibold">
-        Record audio
-      </h2>
+      <div className="flex items-center gap-3">
 
-      <p className="mt-1 text-sm text-zinc-400">
-        Record from your microphone. The transcript starts when you stop.
-      </p>
+        <div className="icon-tile bg-rose-500/15 text-rose-300">
+          <Mic className="size-5" aria-hidden="true" />
+        </div>
+
+        <div>
+
+          <h2 className="text-lg font-semibold">
+            Record audio
+          </h2>
+
+          <p className="text-sm text-zinc-400">
+            Talk freely. Your transcript starts when you stop.
+          </p>
+
+        </div>
+
+      </div>
 
       {/* RECORDING AREA */}
-      <div className="mt-5 flex flex-col items-center rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-8">
+      <div className="mt-5 flex flex-col items-center rounded-xl border border-white/10 bg-zinc-950/60 px-4 py-8">
 
         <div className={`
           flex
@@ -258,7 +270,7 @@ function Recorder() {
           items-center
           justify-center
           rounded-full
-          ${isRecording ? "animate-pulse bg-red-600 text-white" : "bg-zinc-800 text-zinc-300"}
+          ${isRecording ? "animate-pulse bg-red-600 text-white shadow-lg shadow-red-600/40" : "bg-linear-to-br from-rose-500 to-fuchsia-600 text-white"}
         `}>
           <Mic className="size-6" aria-hidden="true" />
         </div>

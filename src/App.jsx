@@ -38,7 +38,7 @@ function App() {
           </Routes>
         </main>
 
-        <footer className="border-t border-zinc-800 px-4 py-6 text-center text-sm text-zinc-500">
+        <footer className="border-t border-white/10 px-4 py-6 text-center text-sm text-zinc-500">
           Transcription by AssemblyAI. Sign-in by Clerk.
         </footer>
 

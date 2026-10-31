@@ -10,31 +10,79 @@
 
 body {
   @apply bg-zinc-950 text-zinc-100 antialiased;
+  background-image:
+    radial-gradient(50rem 30rem at 15% -5%, rgb(139 92 246 / 0.22), transparent),
+    radial-gradient(45rem 28rem at 90% 5%, rgb(217 70 239 / 0.14), transparent),
+    radial-gradient(50rem 30rem at 50% 105%, rgb(34 211 238 / 0.08), transparent);
+  background-attachment: fixed;
 }
 
 @layer components {
 
   .card {
-    @apply rounded-xl border border-zinc-800 bg-zinc-900/50;
+    @apply rounded-2xl border border-white/10 bg-zinc-900/60 backdrop-blur;
+  }
+
+  .text-gradient {
+    @apply bg-linear-to-r from-violet-400 via-fuchsia-400 to-cyan-300 bg-clip-text text-transparent;
+  }
+
+  .icon-tile {
+    @apply flex size-11 items-center justify-center rounded-xl;
   }
 
   .btn {
-    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-zinc-300 disabled:cursor-not-allowed disabled:opacity-50;
+    @apply inline-flex cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-2.5 text-sm font-medium transition-all duration-300 not-disabled:hover:-translate-y-0.5 not-disabled:active:translate-y-0 not-disabled:active:scale-95 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-300 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
+  /* Gradients cannot transition, so the hover slides a wider one across */
   .btn-primary {
-    @apply bg-white text-zinc-900 hover:bg-zinc-200 disabled:hover:bg-white;
+    @apply text-white shadow-lg shadow-violet-950/50 not-disabled:hover:shadow-fuchsia-500/40;
+    background-image: linear-gradient(
+      to right,
+      var(--color-violet-600),
+      var(--color-fuchsia-600),
+      var(--color-pink-500)
+    );
+    background-size: 200% 100%;
+  }
+
+  .btn-primary:not(:disabled):hover {
+    background-position: 100% 0;
   }
 
   .btn-secondary {
-    @apply border border-zinc-700 text-zinc-200 hover:bg-zinc-800 disabled:hover:bg-transparent;
+    @apply border border-white/15 text-zinc-200 not-disabled:hover:border-violet-400/60 not-disabled:hover:bg-violet-500/15 not-disabled:hover:text-violet-100;
+  }
+
+  .btn-delete {
+    @apply not-disabled:hover:border-red-400/60 not-disabled:hover:bg-red-500/15 not-disabled:hover:text-red-200;
+  }
+
+  .btn-ghost {
+    @apply text-zinc-300 not-disabled:hover:bg-violet-500/15 not-disabled:hover:text-violet-100;
   }
 
   .btn-danger {
-    @apply bg-red-600 text-white hover:bg-red-500;
+    @apply bg-red-600 text-white not-disabled:hover:bg-red-500 not-disabled:hover:shadow-lg not-disabled:hover:shadow-red-500/40;
+  }
+
+  .nav-link {
+    @apply relative rounded-lg px-3 py-2 text-sm font-medium text-zinc-400 transition-colors duration-300 after:absolute after:inset-x-3 after:bottom-1 after:h-0.5 after:origin-left after:scale-x-0 after:rounded-full after:bg-linear-to-r after:from-violet-400 after:to-fuchsia-400 after:transition-transform after:duration-300 hover:bg-violet-500/15 hover:text-violet-100 hover:after:scale-x-100;
   }
 
   .alert-error {
     @apply rounded-lg border border-red-900 bg-red-950/50 px-4 py-3 text-sm text-red-300;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+
+    .btn,
+    .nav-link,
+    .nav-link::after {
+      transition-duration: 0s;
+      translate: none !important;
+      scale: none !important;
+    }
   }
 }

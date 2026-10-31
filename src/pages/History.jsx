@@ -40,7 +40,7 @@ function HistoryItem({ item, onDelete }) {
 
   return (
 
-    <article className="card p-5">
+    <article className="card p-5 transition hover:border-violet-400/40">
 
       {/* TOP */}
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -77,7 +77,7 @@ function HistoryItem({ item, onDelete }) {
           <button
             onClick={() => onDelete(item._id)}
             disabled={item.status === "processing"}
-            className="btn btn-secondary"
+            className="btn btn-secondary btn-delete"
           >
             <Trash2 className="size-4" aria-hidden="true" />
             Delete
@@ -111,7 +111,7 @@ function HistoryItem({ item, onDelete }) {
 
           <button
             onClick={() => setExpanded(!expanded)}
-            className="mt-2 cursor-pointer text-sm font-medium text-zinc-400 hover:text-white"
+            className="mt-2 cursor-pointer text-sm font-medium text-violet-300 underline-offset-4 transition-colors duration-300 hover:text-fuchsia-300 hover:underline"
           >
             {expanded ? "Show less" : "Show more"}
           </button>
@@ -327,8 +327,8 @@ function History() {
 
         <div>
 
-          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
-            History
+          <h1 className="text-3xl font-bold tracking-tight sm:text-4xl">
+            Your <span className="text-gradient">words, saved</span>
           </h1>
 
           <p className="mt-2 text-zinc-400">
@@ -357,7 +357,7 @@ function History() {
             onChange={(e) =>
               setSearch(e.target.value)
             }
-            className="w-full rounded-lg border border-zinc-800 bg-zinc-900 py-2.5 pr-3 pl-9 text-sm outline-none placeholder:text-zinc-500 focus:border-zinc-500"
+            className="w-full rounded-lg border border-white/10 bg-zinc-900/60 py-2.5 pr-3 pl-9 text-sm outline-none placeholder:text-zinc-500 focus:border-violet-400"
           />
 
         </div>
@@ -410,7 +410,7 @@ function History() {
 
           <div className="mt-20 text-center">
 
-            <FileText className="mx-auto size-8 text-zinc-600" aria-hidden="true" />
+            <FileText className="mx-auto size-8 text-violet-300" aria-hidden="true" />
 
             <h2 className="mt-4 font-medium">
               No transcripts found

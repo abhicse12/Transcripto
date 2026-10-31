@@ -25,7 +25,10 @@ ReactDOM.createRoot(document.getElementById('root')).render(
         signInUrl="/login"
         signUpUrl="/register"
         afterSignOutUrl="/"
-        appearance={{ baseTheme: dark }}
+        appearance={{
+          baseTheme: dark,
+          variables: { colorPrimary: "#8b5cf6" },
+        }}
       >
 
         <App />

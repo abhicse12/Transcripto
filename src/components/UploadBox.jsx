@@ -90,13 +90,25 @@ function UploadBox() {
 
     <section className="card p-5 sm:p-6">
 
-      <h2 className="text-lg font-semibold">
-        Upload a file
-      </h2>
+      <div className="flex items-center gap-3">
 
-      <p className="mt-1 text-sm text-zinc-400">
-        MP3, WAV, WEBM, M4A, AAC, OGG or FLAC, up to 100 MB.
-      </p>
+        <div className="icon-tile bg-violet-500/15 text-violet-300">
+          <Upload className="size-5" aria-hidden="true" />
+        </div>
+
+        <div>
+
+          <h2 className="text-lg font-semibold">
+            Upload a file
+          </h2>
+
+          <p className="text-sm text-zinc-400">
+            MP3, WAV, WEBM, M4A, AAC, OGG or FLAC, up to 100 MB.
+          </p>
+
+        </div>
+
+      </div>
 
       {/* FILE PICKER */}
       <input
@@ -114,7 +126,7 @@ function UploadBox() {
 
           <div className="mt-5 flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-950 p-4">
 
-            <FileAudio className="size-5 shrink-0 text-zinc-400" aria-hidden="true" />
+            <FileAudio className="size-5 shrink-0 text-violet-300" aria-hidden="true" />
 
             <div className="min-w-0 flex-1">
 
@@ -132,7 +144,7 @@ function UploadBox() {
               onClick={handleRemove}
               disabled={loading}
               aria-label="Remove file"
-              className="btn p-2 text-zinc-400 hover:text-white"
+              className="btn btn-ghost btn-delete p-2"
             >
               <X className="size-4" aria-hidden="true" />
             </button>
@@ -143,10 +155,10 @@ function UploadBox() {
 
           <label
             htmlFor="audio-file"
-            className="mt-5 flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-zinc-700 px-4 py-10 text-center transition-colors hover:border-zinc-500 hover:bg-zinc-900"
+            className="mt-5 flex cursor-pointer flex-col items-center gap-2 rounded-xl border border-dashed border-violet-400/40 bg-violet-500/5 px-4 py-10 text-center transition-colors hover:border-violet-400 hover:bg-violet-500/10"
           >
 
-            <Upload className="size-6 text-zinc-400" aria-hidden="true" />
+            <FileAudio className="size-7 text-violet-300" aria-hidden="true" />
 
             <span className="text-sm font-medium">
               Choose an audio file
