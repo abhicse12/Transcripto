@@ -1,8 +1,12 @@
 import { useState } from "react"
 
-import API from "../api/axios"
+import {
+  MAX_FILE_SIZE,
+  getErrorMessage,
+  transcribeAudio,
+} from "../api/transcripts"
 
-import { useUser } from "@clerk/clerk-react"
+import { useAuth } from "@clerk/clerk-react"
 
 function UploadBox() {
 
@@ -14,12 +18,14 @@ function UploadBox() {
 
   const [error, setError] = useState("")
 
-  const { user } = useUser()
+  const { getToken } = useAuth()
 
   // HANDLE FILE
   const handleFileChange = (e) => {
 
-    setAudioFile(e.target.files[0])
+    setAudioFile(e.target.files[0] || null)
+
+    setError("")
   }
 
   // HANDLE UPLOAD
@@ -27,6 +33,10 @@ function UploadBox() {
 
     if (!audioFile) {
       return alert("Please select audio file")
+    }
+
+    if (audioFile.size > MAX_FILE_SIZE) {
+      return setError("File is too large. Maximum size is 100 MB.")
     }
 
     try {
@@ -37,26 +47,17 @@ function UploadBox() {
 
       setError("")
 
-      const formData = new FormData()
-
-      formData.append("audio", audioFile)
-
-      formData.append("userId", user.id)
-
-      const response = await API.post(
-
-        "/transcript/upload",
-
-        formData
+      setTranscript(
+        await transcribeAudio(getToken, audioFile)
       )
-
-      setTranscript(response.data.transcript)
 
     } catch (error) {
 
       console.log(error)
 
-      setError("Failed to generate transcription")
+      setError(
+        getErrorMessage(error, error.response ? "Failed to generate transcription" : error.message)
+      )
 
     } finally {
 
@@ -78,6 +79,8 @@ function UploadBox() {
     } catch (error) {
 
       console.log(error)
+
+      alert("Could not copy transcript")
     }
   }
 
@@ -91,7 +94,7 @@ function UploadBox() {
       border
       border-zinc-800
       rounded-[32px]
-      p-8
+      p-5
       md:p-12
       shadow-2xl
     ">
@@ -128,8 +131,8 @@ function UploadBox() {
           leading-8
         ">
 
-          Upload MP3, WAV or WEBM audio files and generate
-          instant AI-powered transcriptions securely.
+          Upload MP3, WAV, WEBM, M4A, AAC, OGG or FLAC audio
+          files up to 100 MB and generate AI-powered transcriptions.
 
         </p>
 
@@ -141,7 +144,8 @@ function UploadBox() {
         border-dashed
         border-zinc-700
         rounded-3xl
-        p-10
+        p-5
+        sm:p-10
         text-center
         bg-black/30
         hover:border-purple-500/40
@@ -150,7 +154,7 @@ function UploadBox() {
 
         <input
           type="file"
-          accept="audio/*"
+          accept="audio/*,.webm"
           onChange={handleFileChange}
           className="
             block
@@ -186,7 +190,7 @@ function UploadBox() {
                 Selected File
               </p>
 
-              <p className="text-zinc-300 mt-2">
+              <p className="text-zinc-300 mt-2 break-all">
                 {audioFile.name}
               </p>
 

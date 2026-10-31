@@ -8,10 +8,10 @@ import ProtectedRoute from "./components/ProtectedRoute"
 import Navbar from "./components/Navbar"
 
 import Home from "./pages/Home"
-import Dashboard from "./pages/Dashboard"
 import Login from "./pages/Login"
 import Register from "./pages/Register"
 import History from "./pages/History"
+import NotFound from "./pages/NotFound"
 
 function App() {
   return (
@@ -21,10 +21,9 @@ function App() {
 
         <Navbar />
 
-        <div className="p-10">
+        <div>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route
@@ -35,6 +34,7 @@ function App() {
                 </ProtectedRoute>
               }
             />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </div>
 

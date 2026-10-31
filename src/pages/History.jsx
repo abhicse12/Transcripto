@@ -1,65 +1,127 @@
 import { useEffect, useState } from "react"
 
-import API from "../api/axios"
+import {
+  deleteTranscript,
+  fetchTranscript,
+  fetchTranscripts,
+  getErrorMessage,
+} from "../api/transcripts"
 
-import { useUser } from "@clerk/clerk-react"
+import { useAuth } from "@clerk/clerk-react"
+
+const SEARCH_DELAY = 400
+
+const POLL_INTERVAL = 5000
+
+const STATUS_BADGES = {
+  completed: {
+    label: "AI Transcript",
+    className: "bg-green-500/10 text-green-400 border-green-500/20",
+  },
+  processing: {
+    label: "Processing",
+    className: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  },
+  failed: {
+    label: "Failed",
+    className: "bg-red-500/10 text-red-400 border-red-500/20",
+  },
+}
 
 function History() {
 
   const [transcripts, setTranscripts] = useState([])
 
-  const [filteredTranscripts, setFilteredTranscripts] = useState([])
-
   const [loading, setLoading] = useState(true)
+
+  const [loadingMore, setLoadingMore] = useState(false)
+
+  const [hasMore, setHasMore] = useState(false)
+
+  const [page, setPage] = useState(1)
+
+  const [error, setError] = useState("")
 
   const [search, setSearch] = useState("")
 
-  const { user } = useUser()
+  const [activeSearch, setActiveSearch] = useState("")
 
-  // FETCH TRANSCRIPTS
-  const fetchTranscripts = async () => {
+  const [retryCount, setRetryCount] = useState(0)
+
+  const { getToken } = useAuth()
+
+  // RELOAD FROM FIRST PAGE
+  const reload = (nextSearch) => {
+
+    setLoading(true)
+
+    setError("")
+
+    setPage(1)
+
+    setActiveSearch(nextSearch)
+
+    setRetryCount((count) => count + 1)
+  }
+
+  // LOAD NEXT PAGE
+  const handleLoadMore = async () => {
 
     try {
 
-      const response = await API.get(
+      setLoadingMore(true)
 
-        `/transcript?userId=${user.id}`
-      )
+      const nextPage = page + 1
 
-      setTranscripts(response.data.transcripts)
+      const data = await fetchTranscripts(getToken, {
+        page: nextPage,
+        search: activeSearch,
+      })
 
-      setFilteredTranscripts(
-        response.data.transcripts
-      )
+      // New uploads shift pages, so skip anything already listed
+      setTranscripts((current) => [
+        ...current,
+        ...data.transcripts.filter(
+          (item) => !current.some((existing) => existing._id === item._id)
+        ),
+      ])
+
+      setPage(nextPage)
+
+      setHasMore(data.hasMore)
 
     } catch (error) {
 
       console.log(error)
 
+      alert(getErrorMessage(error, "Failed to load more transcripts"))
+
     } finally {
 
-      setLoading(false)
+      setLoadingMore(false)
     }
   }
 
   // DELETE
   const handleDelete = async (id) => {
 
+    if (!window.confirm("Delete this transcript? This cannot be undone.")) {
+      return
+    }
+
     try {
 
-      await API.delete(`/transcript/${id}`)
+      await deleteTranscript(getToken, id)
 
-      const updated = transcripts.filter(
-        (item) => item._id !== id
+      setTranscripts((current) =>
+        current.filter((item) => item._id !== id)
       )
-
-      setTranscripts(updated)
-
-      setFilteredTranscripts(updated)
 
     } catch (error) {
 
       console.log(error)
+
+      alert(getErrorMessage(error, "Failed to delete transcript"))
     }
   }
 
@@ -75,31 +137,95 @@ function History() {
     } catch (error) {
 
       console.log(error)
+
+      alert("Could not copy transcript")
     }
   }
 
   // SEARCH
   useEffect(() => {
 
-    const filtered = transcripts.filter((item) =>
-
-      item.transcriptText
-        .toLowerCase()
-        .includes(search.toLowerCase())
-    )
-
-    setFilteredTranscripts(filtered)
-
-  }, [search, transcripts])
-
-  // FETCH ON LOAD
-  useEffect(() => {
-
-    if (user) {
-      fetchTranscripts()
+    if (search === activeSearch) {
+      return
     }
 
-  }, [user])
+    const timer = setTimeout(() => reload(search), SEARCH_DELAY)
+
+    return () => clearTimeout(timer)
+
+  }, [search, activeSearch])
+
+  // FETCH ON LOAD AND ON SEARCH
+  useEffect(() => {
+
+    let ignore = false
+
+    fetchTranscripts(getToken, { search: activeSearch })
+      .then((data) => {
+
+        if (ignore) return
+
+        setTranscripts(data.transcripts)
+
+        setHasMore(data.hasMore)
+
+        setLoading(false)
+      })
+      .catch((error) => {
+
+        console.log(error)
+
+        if (ignore) return
+
+        setError(getErrorMessage(error, "Failed to load transcripts"))
+
+        setLoading(false)
+      })
+
+    return () => {
+      ignore = true
+    }
+
+  }, [getToken, activeSearch, retryCount])
+
+  const processingIds = transcripts
+    .filter((item) => item.status === "processing")
+    .map((item) => item._id)
+    .join(",")
+
+  // REFRESH TRANSCRIPTS THAT ARE STILL PROCESSING
+  useEffect(() => {
+
+    if (!processingIds) {
+      return
+    }
+
+    const timer = setInterval(async () => {
+
+      try {
+
+        const updates = await Promise.all(
+          processingIds.split(",").map((id) =>
+            fetchTranscript(getToken, id)
+          )
+        )
+
+        setTranscripts((current) =>
+          current.map((item) =>
+            updates.find((update) => update._id === item._id) || item
+          )
+        )
+
+      } catch (error) {
+
+        console.log(error)
+      }
+
+    }, POLL_INTERVAL)
+
+    return () => clearInterval(timer)
+
+  }, [getToken, processingIds])
 
   return (
 
@@ -142,8 +268,10 @@ function History() {
       <div className="
         max-w-7xl
         mx-auto
-        px-6
-        pt-20
+        px-4
+        sm:px-6
+        pt-12
+        sm:pt-20
         pb-10
       ">
 
@@ -236,10 +364,47 @@ function History() {
         )
       }
 
+      {/* ERROR */}
+      {
+        !loading && error && (
+
+          <div className="
+            text-center
+            mt-24
+            px-4
+          ">
+
+            <p className="
+              text-red-400
+              text-lg
+              mb-6
+            ">
+              {error}
+            </p>
+
+            <button
+              onClick={() => reload(activeSearch)}
+              className="
+                bg-white
+                text-black
+                px-6
+                py-3
+                rounded-2xl
+                font-semibold
+              "
+            >
+              Try Again
+            </button>
+
+          </div>
+        )
+      }
+
       {/* EMPTY STATE */}
       {
         !loading &&
-        filteredTranscripts.length === 0 && (
+        !error &&
+        transcripts.length === 0 && (
 
           <div className="
             text-center
@@ -266,7 +431,11 @@ function History() {
               text-zinc-500
               text-lg
             ">
-              Upload or record audio to generate transcripts.
+              {
+                activeSearch
+                  ? "Try a different search."
+                  : "Upload or record audio to generate transcripts."
+              }
             </p>
 
           </div>
@@ -277,14 +446,15 @@ function History() {
       <div className="
         max-w-7xl
         mx-auto
-        px-6
+        px-4
+        sm:px-6
         pb-24
         grid
         gap-8
       ">
 
         {
-          filteredTranscripts.map((item) => (
+          !loading && !error && transcripts.map((item) => (
 
             <div
               key={item._id}
@@ -294,7 +464,8 @@ function History() {
                 border
                 border-zinc-800
                 rounded-[28px]
-                p-8
+                p-5
+                sm:p-8
                 hover:border-purple-500/30
                 hover:-translate-y-1
                 transition
@@ -315,24 +486,22 @@ function History() {
 
                 <div>
 
-                  <div className="
+                  <div className={`
                     inline-flex
                     items-center
                     gap-2
-                    bg-green-500/10
-                    text-green-400
                     border
-                    border-green-500/20
                     px-4
                     py-2
                     rounded-full
                     text-sm
                     mb-4
-                  ">
+                    ${STATUS_BADGES[item.status].className}
+                  `}>
 
                     <span>●</span>
 
-                    AI Transcript
+                    {STATUS_BADGES[item.status].label}
 
                   </div>
 
@@ -366,6 +535,7 @@ function History() {
                     onClick={() =>
                       handleCopy(item.transcriptText)
                     }
+                    disabled={!item.transcriptText}
                     className="
                       bg-blue-500/10
                       text-blue-400
@@ -376,6 +546,8 @@ function History() {
                       rounded-2xl
                       hover:bg-blue-500/20
                       transition
+                      disabled:opacity-50
+                      disabled:cursor-not-allowed
                     "
                   >
                     Copy
@@ -385,6 +557,7 @@ function History() {
                     onClick={() =>
                       handleDelete(item._id)
                     }
+                    disabled={item.status === "processing"}
                     className="
                       bg-red-500/10
                       text-red-400
@@ -395,6 +568,8 @@ function History() {
                       rounded-2xl
                       hover:bg-red-500/20
                       transition
+                      disabled:opacity-50
+                      disabled:cursor-not-allowed
                     "
                   >
                     Delete
@@ -410,21 +585,56 @@ function History() {
                 border
                 border-zinc-800
                 rounded-3xl
-                p-6
+                p-4
+                sm:p-6
               ">
 
                 <p className="
                   text-zinc-300
                   leading-9
                   whitespace-pre-wrap
+                  break-words
                 ">
-                  {item.transcriptText}
+                  {
+                    item.transcriptText ||
+                    item.errorMessage ||
+                    (item.status === "processing"
+                      ? "AI is generating transcription..."
+                      : "No speech was detected in this audio.")
+                  }
                 </p>
 
               </div>
 
             </div>
           ))
+        }
+
+        {/* LOAD MORE */}
+        {
+          !loading && !error && hasMore && (
+
+            <div className="text-center">
+
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="
+                  bg-white
+                  text-black
+                  px-6
+                  py-3
+                  rounded-2xl
+                  font-semibold
+                  disabled:opacity-50
+                  disabled:cursor-not-allowed
+                "
+              >
+                {loadingMore ? "Loading..." : "Load More"}
+              </button>
+
+            </div>
+          )
         }
 
       </div>

@@ -1,3 +1,5 @@
+import { Link } from "react-router-dom"
+
 import UploadBox from "../components/UploadBox"
 import Recorder from "../components/Recorder"
 
@@ -131,44 +133,78 @@ function Home() {
           sm:w-auto
         ">
 
-          <button className="
-            w-full
-            sm:w-auto
-            bg-white
-            text-black
-            px-8
-            py-4
-            rounded-2xl
-            font-semibold
-            hover:scale-105
-            transition
-            shadow-2xl
-          ">
-            Start Transcribing
-          </button>
+          <SignedIn>
 
-          <button className="
-            w-full
-            sm:w-auto
-            border
-            border-zinc-700
-            bg-zinc-900/60
-            backdrop-blur-xl
-            px-8
-            py-4
-            rounded-2xl
-            hover:bg-zinc-800
-            transition
-          ">
+            <a
+              href="#transcribe"
+              className="
+                w-full
+                sm:w-auto
+                bg-white
+                text-black
+                px-8
+                py-4
+                rounded-2xl
+                font-semibold
+                hover:scale-105
+                transition
+                shadow-2xl
+              "
+            >
+              Start Transcribing
+            </a>
+
+          </SignedIn>
+
+          <SignedOut>
+
+            <Link
+              to="/login"
+              className="
+                w-full
+                sm:w-auto
+                bg-white
+                text-black
+                px-8
+                py-4
+                rounded-2xl
+                font-semibold
+                hover:scale-105
+                transition
+                shadow-2xl
+              "
+            >
+              Start Transcribing
+            </Link>
+
+          </SignedOut>
+
+          <a
+            href="#features"
+            className="
+              w-full
+              sm:w-auto
+              border
+              border-zinc-700
+              bg-zinc-900/60
+              backdrop-blur-xl
+              px-8
+              py-4
+              rounded-2xl
+              hover:bg-zinc-800
+              transition
+            "
+          >
             Explore Features
-          </button>
+          </a>
 
         </div>
 
       </section>
 
       {/* FEATURES SECTION */}
-      <section className="
+      <section id="features" className="
+        scroll-mt-24
         max-w-7xl
         mx-auto
         grid
@@ -213,8 +249,8 @@ function Home() {
           </h2>
 
           <p className="text-zinc-400 leading-8">
-            Upload MP3, WAV or WEBM audio files and generate
-            high-quality AI transcriptions instantly.
+            Upload MP3, WAV, WEBM, M4A, AAC, OGG or FLAC audio
+            files and generate high-quality AI transcriptions.
           </p>
 
         </div>
@@ -253,7 +289,7 @@ function Home() {
 
           <p className="text-zinc-400 leading-8">
             Record your voice directly from browser using
-            MediaRecorder API with real-time AI processing.
+            the MediaRecorder API and get an AI transcript.
           </p>
 
         </div>
@@ -302,7 +338,7 @@ function Home() {
       {/* AUTHENTICATED USER */}
       <SignedIn>
 
-        <div className="pb-20 px-4 sm:px-6">
+        <div id="transcribe" className="scroll-mt-24 pb-20 px-4 sm:px-6">
           <UploadBox />
         </div>
 

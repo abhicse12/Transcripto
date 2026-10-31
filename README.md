@@ -31,7 +31,7 @@ https://transcripto-backend-h9e7.onrender.com
 
 - 🎵 Upload audio files
 - 🎙️ Live voice recording
-- 🤖 AI-powered transcription
+- 🤖 AI-powered transcription with automatic language detection
 - 🔐 Clerk authentication
 - 📂 User-specific transcript history
 - 📋 Copy transcript feature
@@ -119,7 +119,7 @@ MongoDB Atlas Database
 ## Clone Repository
 
 ```bash
-git clone https://github.com/abhicse12/transcripto-ai.git
+git clone https://github.com/abhicse12/Transcripto.git
 ```
 
 ---
@@ -151,6 +151,9 @@ npm run dev
 
 ```env
 VITE_CLERK_PUBLISHABLE_KEY=your_key
+
+# Optional. Local dev defaults to http://localhost:5000/api
+VITE_API_URL=https://your-backend.example.com/api
 ```
 
 ---
@@ -160,7 +163,14 @@ VITE_CLERK_PUBLISHABLE_KEY=your_key
 ```env
 MONGO_URI=your_mongodb_uri
 
-ASSEMBLYAI_API_KEY=your_api_key
+ASSEMBLY_API_KEY=your_api_key
+
+CLERK_PUBLISHABLE_KEY=your_key
+
+CLERK_SECRET_KEY=your_secret_key
+
+# Optional. Comma separated allowed frontend origins
+CLIENT_URLS=https://transcripto-silk.vercel.app,http://localhost:5173
 ```
 
 ---
@@ -200,7 +210,7 @@ Transcripto/
 # 🔥 Core Functionalities
 
 ## 🎵 Audio Upload
-Users can upload MP3, WAV, and WEBM files for AI transcription.
+Users can upload MP3, WAV, WEBM, M4A, AAC, OGG, and FLAC files up to 100 MB for AI transcription.
 
 ## 🎙️ Live Recording
 Users can record voice directly from the browser using the MediaRecorder API.
@@ -209,7 +219,7 @@ Users can record voice directly from the browser using the MediaRecorder API.
 AssemblyAI converts speech into accurate text transcriptions using AI-powered speech recognition.
 
 ## 🔐 Authentication
-Clerk authentication secures user accounts and protects private routes.
+Clerk authentication secures user accounts. The backend verifies the session token on every API request, so users can only access their own transcripts.
 
 ## 📂 Transcript History
 Users can manage, search, copy, and delete previous transcriptions.
@@ -233,7 +243,6 @@ MongoDB Atlas cloud database.
 
 - 📄 Download transcript feature
 - 🧠 AI transcript summarization
-- 🌍 Multi-language transcription
 - ⚡ Real-time speech streaming
 - ☁️ Cloud audio storage
 - 📱 Mobile app support

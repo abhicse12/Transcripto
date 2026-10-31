@@ -1,8 +1,17 @@
 import { useRef, useState, useEffect } from "react"
 
-import API from "../api/axios"
+import {
+  getErrorMessage,
+  transcribeAudio,
+} from "../api/transcripts"
 
-import { useUser } from "@clerk/clerk-react"
+import { useAuth } from "@clerk/clerk-react"
+
+const MIC_ERRORS = {
+  NotAllowedError: "Microphone access denied",
+  NotFoundError: "No microphone found",
+  NotReadableError: "Microphone is being used by another app",
+}
 
 function Recorder() {
 
@@ -22,7 +31,29 @@ function Recorder() {
 
   const timerRef = useRef(null)
 
-  const { user } = useUser()
+  const streamRef = useRef(null)
+
+  const audioURLRef = useRef("")
+
+  const { getToken } = useAuth()
+
+  // RELEASE MIC AND AUDIO ON LEAVE
+  useEffect(() => {
+
+    return () => {
+
+      if (mediaRecorderRef.current) {
+        mediaRecorderRef.current.onstop = null
+      }
+
+      streamRef.current?.getTracks().forEach((track) => track.stop())
+
+      if (audioURLRef.current) {
+        URL.revokeObjectURL(audioURLRef.current)
+      }
+    }
+
+  }, [])
 
   // TIMER
   useEffect(() => {
@@ -67,6 +98,8 @@ function Recorder() {
         audio: true,
       })
 
+      streamRef.current = stream
+
       const mediaRecorder = new MediaRecorder(stream)
 
       mediaRecorderRef.current = mediaRecorder
@@ -81,16 +114,26 @@ function Recorder() {
       // ON STOP
       mediaRecorder.onstop = async () => {
 
+        // Browsers record different formats, Safari uses MP4
+        const audioType =
+          mediaRecorder.mimeType.split(";")[0] || "audio/webm"
+
         const audioBlob = new Blob(
 
           audioChunksRef.current,
 
           {
-            type: "audio/webm",
+            type: audioType,
           }
         )
 
+        if (audioURLRef.current) {
+          URL.revokeObjectURL(audioURLRef.current)
+        }
+
         const audioUrl = URL.createObjectURL(audioBlob)
+
+        audioURLRef.current = audioUrl
 
         setAudioURL(audioUrl)
 
@@ -98,10 +141,10 @@ function Recorder() {
 
           [audioBlob],
 
-          "recording.webm",
+          audioType.includes("mp4") ? "recording.m4a" : "recording.webm",
 
           {
-            type: "audio/webm",
+            type: audioType,
           }
         )
 
@@ -109,26 +152,17 @@ function Recorder() {
 
           setLoading(true)
 
-          const formData = new FormData()
-
-          formData.append("audio", audioFile)
-
-          formData.append("userId", user.id)
-
-          const response = await API.post(
-
-            "/transcript/upload",
-
-            formData
+          setTranscript(
+            await transcribeAudio(getToken, audioFile)
           )
-
-          setTranscript(response.data.transcript)
 
         } catch (error) {
 
           console.log(error)
 
-          alert("Transcription failed")
+          alert(
+            getErrorMessage(error, error.response ? "Transcription failed" : error.message)
+          )
 
         } finally {
 
@@ -144,7 +178,9 @@ function Recorder() {
 
       console.log(error)
 
-      alert("Microphone access denied")
+      streamRef.current?.getTracks().forEach((track) => track.stop())
+
+      alert(MIC_ERRORS[error.name] || "Could not start recording")
     }
   }
 
@@ -152,6 +188,8 @@ function Recorder() {
   const stopRecording = () => {
 
     mediaRecorderRef.current.stop()
+
+    streamRef.current.getTracks().forEach((track) => track.stop())
 
     setIsRecording(false)
   }
@@ -170,6 +208,8 @@ function Recorder() {
     } catch (error) {
 
       console.log(error)
+
+      alert("Could not copy transcript")
     }
   }
 
@@ -183,7 +223,7 @@ function Recorder() {
       border
       border-zinc-800
       rounded-[32px]
-      p-8
+      p-5
       md:p-12
       shadow-2xl
     ">
@@ -233,7 +273,8 @@ function Recorder() {
         border
         border-zinc-800
         rounded-3xl
-        p-10
+        p-5
+        sm:p-10
         text-center
       ">
 
@@ -307,16 +348,20 @@ function Recorder() {
 
             <button
               onClick={startRecording}
+              disabled={loading}
               className="
                 bg-white
                 text-black
-                px-10
+                px-6
+                sm:px-10
                 py-4
                 rounded-2xl
                 font-bold
                 text-lg
                 hover:scale-105
                 transition
+                disabled:opacity-50
+                disabled:cursor-not-allowed
                 shadow-xl
               "
             >
@@ -330,7 +375,8 @@ function Recorder() {
               className="
                 bg-red-500
                 text-white
-                px-10
+                px-6
+                sm:px-10
                 py-4
                 rounded-2xl
                 font-bold
