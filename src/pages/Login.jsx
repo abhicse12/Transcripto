@@ -6,7 +6,7 @@ function Login() {
 
   return (
 
-    <div className="min-h-screen bg-black flex items-center justify-center px-4 py-10">
+    <div className="flex justify-center px-4 py-12">
 
       <SignIn />
 

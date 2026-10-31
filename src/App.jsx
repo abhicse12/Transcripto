@@ -17,11 +17,11 @@ function App() {
   return (
     <BrowserRouter>
 
-      <div className="min-h-screen bg-black text-white">
+      <div className="flex min-h-screen flex-col">
 
         <Navbar />
 
-        <div>
+        <main className="flex-1">
           <Routes>
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
@@ -36,7 +36,11 @@ function App() {
             />
             <Route path="*" element={<NotFound />} />
           </Routes>
-        </div>
+        </main>
+
+        <footer className="border-t border-zinc-800 px-4 py-6 text-center text-sm text-zinc-500">
+          Transcription by AssemblyAI. Sign-in by Clerk.
+        </footer>
 
       </div>
 

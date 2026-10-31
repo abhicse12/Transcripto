@@ -1,6 +1,4 @@
-# 🎙️ Transcripto AI
-
-⭐ If you like this project, give it a star on GitHub!
+# Transcripto
 
 ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
@@ -13,7 +11,7 @@
 
 # 🚀 About The Project
 
-Transcripto AI is a full-stack AI-powered speech-to-text SaaS application that allows users to upload audio files or record live voice directly from the browser and generate accurate transcriptions using AssemblyAI. The platform includes secure authentication, transcript history management, and a modern responsive UI.
+Transcripto is a full-stack speech-to-text web app. Users can upload audio files or record from the browser and get a transcript from AssemblyAI. Each user has a private transcript history behind Clerk authentication.
 
 ---
 
@@ -29,16 +27,12 @@ https://transcripto-backend-h9e7.onrender.com
 
 # ✨ Features
 
-- 🎵 Upload audio files
-- 🎙️ Live voice recording
-- 🤖 AI-powered transcription with automatic language detection
-- 🔐 Clerk authentication
-- 📂 User-specific transcript history
-- 📋 Copy transcript feature
-- 🗑️ Delete transcript feature
-- ⚡ Fast and responsive UI
-- 🌑 Premium dark SaaS interface
-- ☁️ Cloud deployment
+- Upload audio files up to 100 MB
+- Record from the browser, with playback, discard and reset
+- Transcription with automatic language detection
+- Clerk authentication, verified on the backend
+- Private transcript history with search, copy and delete
+- Responsive dark interface
 
 ---
 
@@ -213,10 +207,10 @@ Transcripto/
 Users can upload MP3, WAV, WEBM, M4A, AAC, OGG, and FLAC files up to 100 MB for AI transcription.
 
 ## 🎙️ Live Recording
-Users can record voice directly from the browser using the MediaRecorder API.
+Users can record from the browser using the MediaRecorder API, discard a recording in progress, or reset and record again.
 
 ## 🤖 AI Transcription
-AssemblyAI converts speech into accurate text transcriptions using AI-powered speech recognition.
+AssemblyAI converts speech into text. The backend submits the audio and the frontend polls until the transcript is ready.
 
 ## 🔐 Authentication
 Clerk authentication secures user accounts. The backend verifies the session token on every API request, so users can only access their own transcripts.

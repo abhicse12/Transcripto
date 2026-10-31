@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useRef, useState } from "react"
 
 import {
   MAX_FILE_SIZE,
@@ -6,7 +6,14 @@ import {
   transcribeAudio,
 } from "../api/transcripts"
 
+import TranscriptResult from "./TranscriptResult"
+
 import { useAuth } from "@clerk/clerk-react"
+
+import { FileAudio, Loader2, Upload, X } from "lucide-react"
+
+const formatSize = (bytes) =>
+  `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 
 function UploadBox() {
 
@@ -18,26 +25,40 @@ function UploadBox() {
 
   const [error, setError] = useState("")
 
+  const inputRef = useRef(null)
+
   const { getToken } = useAuth()
 
   // HANDLE FILE
   const handleFileChange = (e) => {
 
-    setAudioFile(e.target.files[0] || null)
+    const file = e.target.files[0] || null
+
+    setAudioFile(file)
+
+    setTranscript("")
+
+    setError(
+      file && file.size > MAX_FILE_SIZE
+        ? "File is too large. Maximum size is 100 MB."
+        : ""
+    )
+  }
+
+  // REMOVE FILE
+  const handleRemove = () => {
+
+    inputRef.current.value = ""
+
+    setAudioFile(null)
+
+    setTranscript("")
 
     setError("")
   }
 
   // HANDLE UPLOAD
   const handleUpload = async () => {
-
-    if (!audioFile) {
-      return alert("Please select audio file")
-    }
-
-    if (audioFile.size > MAX_FILE_SIZE) {
-      return setError("File is too large. Maximum size is 100 MB.")
-    }
 
     try {
 
@@ -65,292 +86,102 @@ function UploadBox() {
     }
   }
 
-  // COPY TRANSCRIPT
-  const handleCopy = async () => {
-
-    try {
-
-      await navigator.clipboard.writeText(
-        transcript
-      )
-
-      alert("Transcript copied")
-
-    } catch (error) {
-
-      console.log(error)
-
-      alert("Could not copy transcript")
-    }
-  }
-
   return (
 
-    <div className="
-      max-w-5xl
-      mx-auto
-      bg-zinc-900/60
-      backdrop-blur-xl
-      border
-      border-zinc-800
-      rounded-[32px]
-      p-5
-      md:p-12
-      shadow-2xl
-    ">
+    <section className="card p-5 sm:p-6">
 
-      {/* HEADER */}
-      <div className="text-center mb-12">
+      <h2 className="text-lg font-semibold">
+        Upload a file
+      </h2>
 
-        <h2 className="
-          text-4xl
-          md:text-5xl
-          font-black
-          mb-5
-        ">
+      <p className="mt-1 text-sm text-zinc-400">
+        MP3, WAV, WEBM, M4A, AAC, OGG or FLAC, up to 100 MB.
+      </p>
 
-          Upload Audio For
+      {/* FILE PICKER */}
+      <input
+        ref={inputRef}
+        id="audio-file"
+        type="file"
+        accept="audio/*,.webm"
+        onChange={handleFileChange}
+        disabled={loading}
+        className="sr-only"
+      />
 
-          <span className="
-            bg-gradient-to-r
-            from-purple-400
-            to-blue-400
-            bg-clip-text
-            text-transparent
-          ">
-            {" "}AI Transcription
-          </span>
+      {
+        audioFile ? (
 
-        </h2>
+          <div className="mt-5 flex items-center gap-3 rounded-lg border border-zinc-800 bg-zinc-950 p-4">
 
-        <p className="
-          text-zinc-400
-          text-lg
-          max-w-2xl
-          mx-auto
-          leading-8
-        ">
+            <FileAudio className="size-5 shrink-0 text-zinc-400" aria-hidden="true" />
 
-          Upload MP3, WAV, WEBM, M4A, AAC, OGG or FLAC audio
-          files up to 100 MB and generate AI-powered transcriptions.
+            <div className="min-w-0 flex-1">
 
-        </p>
-
-      </div>
-
-      {/* UPLOAD AREA */}
-      <div className="
-        border-2
-        border-dashed
-        border-zinc-700
-        rounded-3xl
-        p-5
-        sm:p-10
-        text-center
-        bg-black/30
-        hover:border-purple-500/40
-        transition
-      ">
-
-        <input
-          type="file"
-          accept="audio/*,.webm"
-          onChange={handleFileChange}
-          className="
-            block
-            w-full
-            text-zinc-400
-            file:mr-4
-            file:py-3
-            file:px-6
-            file:rounded-xl
-            file:border-0
-            file:bg-white
-            file:text-black
-            file:font-semibold
-            hover:file:scale-105
-            file:transition
-            cursor-pointer
-          "
-        />
-
-        {
-          audioFile && (
-
-            <div className="
-              mt-6
-              bg-zinc-900
-              border
-              border-zinc-800
-              rounded-2xl
-              p-5
-            ">
-
-              <p className="text-green-400 font-medium">
-                Selected File
-              </p>
-
-              <p className="text-zinc-300 mt-2 break-all">
+              <p className="truncate text-sm font-medium">
                 {audioFile.name}
               </p>
 
+              <p className="text-sm text-zinc-500">
+                {formatSize(audioFile.size)}
+              </p>
+
             </div>
-          )
-        }
 
-      </div>
-
-      {/* BUTTON */}
-      <div className="flex justify-center mt-10">
-
-        <button
-          onClick={handleUpload}
-          disabled={loading}
-          className="
-            bg-white
-            text-black
-            px-10
-            py-4
-            rounded-2xl
-            font-bold
-            text-lg
-            hover:scale-105
-            transition
-            disabled:opacity-50
-            disabled:cursor-not-allowed
-            shadow-xl
-          "
-        >
-
-          {
-            loading
-              ? "Generating..."
-              : "Generate Transcript"
-          }
-
-        </button>
-
-      </div>
-
-      {/* LOADING */}
-      {
-        loading && (
-
-          <div className="mt-8 text-center">
-
-            <p className="
-              text-blue-400
-              text-lg
-              animate-pulse
-            ">
-              AI is generating transcription...
-            </p>
+            <button
+              onClick={handleRemove}
+              disabled={loading}
+              aria-label="Remove file"
+              className="btn p-2 text-zinc-400 hover:text-white"
+            >
+              <X className="size-4" aria-hidden="true" />
+            </button>
 
           </div>
+
+        ) : (
+
+          <label
+            htmlFor="audio-file"
+            className="mt-5 flex cursor-pointer flex-col items-center gap-2 rounded-lg border border-dashed border-zinc-700 px-4 py-10 text-center transition-colors hover:border-zinc-500 hover:bg-zinc-900"
+          >
+
+            <Upload className="size-6 text-zinc-400" aria-hidden="true" />
+
+            <span className="text-sm font-medium">
+              Choose an audio file
+            </span>
+
+          </label>
         )
       }
+
+      {/* BUTTON */}
+      <button
+        onClick={handleUpload}
+        disabled={!audioFile || loading || audioFile.size > MAX_FILE_SIZE}
+        className="btn btn-primary mt-4 w-full"
+      >
+
+        {loading && <Loader2 className="size-4 animate-spin" aria-hidden="true" />}
+
+        {loading ? "Transcribing..." : "Generate transcript"}
+
+      </button>
 
       {/* ERROR */}
       {
         error && (
-
-          <div className="
-            mt-8
-            bg-red-500/10
-            border
-            border-red-500/20
-            rounded-2xl
-            p-5
-          ">
-
-            <p className="text-red-400">
-              {error}
-            </p>
-
-          </div>
+          <p className="alert-error mt-4">
+            {error}
+          </p>
         )
       }
 
       {/* TRANSCRIPT */}
-      {
-        transcript && (
+      {transcript && <TranscriptResult text={transcript} />}
 
-          <div className="
-            mt-10
-            bg-black/40
-            border
-            border-zinc-800
-            rounded-3xl
-            p-8
-          ">
-
-            <div className="
-              flex
-              flex-col
-              md:flex-row
-              md:items-center
-              md:justify-between
-              gap-4
-              mb-6
-            ">
-
-              <div>
-
-                <h3 className="
-                  text-3xl
-                  font-black
-                ">
-                  AI Transcription
-                </h3>
-
-                <p className="text-zinc-500 mt-2">
-                  Generated successfully
-                </p>
-
-              </div>
-
-              <button
-                onClick={handleCopy}
-                className="
-                  bg-blue-500/10
-                  text-blue-400
-                  border
-                  border-blue-500/20
-                  px-6
-                  py-3
-                  rounded-2xl
-                  hover:bg-blue-500/20
-                  transition
-                "
-              >
-                Copy Transcript
-              </button>
-
-            </div>
-
-            <div className="
-              bg-zinc-950
-              border
-              border-zinc-800
-              rounded-2xl
-              p-6
-            ">
-
-              <p className="
-                text-zinc-300
-                leading-9
-                whitespace-pre-wrap
-              ">
-                {transcript}
-              </p>
-
-            </div>
-
-          </div>
-        )
-      }
-
-    </div>
+    </section>
   )
 }
 

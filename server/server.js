@@ -33,7 +33,6 @@ const app = express()
 // Middleware
 app.use(helmet())
 app.use(cors({ origin: allowedOrigins }))
-app.use(express.json())
 app.use(clerkMiddleware())
 
 app.use("/api/transcript", transcriptRoutes)

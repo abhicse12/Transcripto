@@ -5,7 +5,11 @@ import {
   transcribeAudio,
 } from "../api/transcripts"
 
+import TranscriptResult from "./TranscriptResult"
+
 import { useAuth } from "@clerk/clerk-react"
+
+import { Loader2, Mic, RotateCcw, Square, Trash2 } from "lucide-react"
 
 const MIC_ERRORS = {
   NotAllowedError: "Microphone access denied",
@@ -24,6 +28,8 @@ function Recorder() {
   const [loading, setLoading] = useState(false)
 
   const [recordingTime, setRecordingTime] = useState(0)
+
+  const [error, setError] = useState("")
 
   const mediaRecorderRef = useRef(null)
 
@@ -85,14 +91,48 @@ function Recorder() {
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`
   }
 
+  // RESET, ALSO DISCARDS A RECORDING IN PROGRESS
+  const resetRecording = () => {
+
+    const mediaRecorder = mediaRecorderRef.current
+
+    if (mediaRecorder) {
+
+      // Without onstop the discarded audio is never uploaded
+      mediaRecorder.onstop = null
+
+      if (mediaRecorder.state !== "inactive") {
+        mediaRecorder.stop()
+      }
+    }
+
+    streamRef.current?.getTracks().forEach((track) => track.stop())
+
+    if (audioURLRef.current) {
+      URL.revokeObjectURL(audioURLRef.current)
+    }
+
+    audioURLRef.current = ""
+
+    audioChunksRef.current = []
+
+    setIsRecording(false)
+
+    setAudioURL("")
+
+    setTranscript("")
+
+    setRecordingTime(0)
+
+    setError("")
+  }
+
   // START RECORDING
   const startRecording = async () => {
 
     try {
 
-      setTranscript("")
-
-      setRecordingTime(0)
+      resetRecording()
 
       const stream = await navigator.mediaDevices.getUserMedia({
         audio: true,
@@ -160,7 +200,7 @@ function Recorder() {
 
           console.log(error)
 
-          alert(
+          setError(
             getErrorMessage(error, error.response ? "Transcription failed" : error.message)
           )
 
@@ -180,7 +220,7 @@ function Recorder() {
 
       streamRef.current?.getTracks().forEach((track) => track.stop())
 
-      alert(MIC_ERRORS[error.name] || "Could not start recording")
+      setError(MIC_ERRORS[error.name] || "Could not start recording")
     }
   }
 
@@ -194,345 +234,146 @@ function Recorder() {
     setIsRecording(false)
   }
 
-  // COPY
-  const handleCopy = async () => {
-
-    try {
-
-      await navigator.clipboard.writeText(
-        transcript
-      )
-
-      alert("Transcript copied")
-
-    } catch (error) {
-
-      console.log(error)
-
-      alert("Could not copy transcript")
-    }
-  }
+  const canReset =
+    !isRecording && !loading && (audioURL || transcript || error)
 
   return (
 
-    <div className="
-      max-w-5xl
-      mx-auto
-      bg-zinc-900/60
-      backdrop-blur-xl
-      border
-      border-zinc-800
-      rounded-[32px]
-      p-5
-      md:p-12
-      shadow-2xl
-    ">
+    <section className="card p-5 sm:p-6">
 
-      {/* HEADER */}
-      <div className="text-center mb-12">
+      <h2 className="text-lg font-semibold">
+        Record audio
+      </h2>
 
-        <h2 className="
-          text-4xl
-          md:text-5xl
-          font-black
-          mb-5
-        ">
+      <p className="mt-1 text-sm text-zinc-400">
+        Record from your microphone. The transcript starts when you stop.
+      </p>
 
-          Live AI
+      {/* RECORDING AREA */}
+      <div className="mt-5 flex flex-col items-center rounded-lg border border-zinc-800 bg-zinc-950 px-4 py-8">
 
-          <span className="
-            bg-gradient-to-r
-            from-red-400
-            to-pink-400
-            bg-clip-text
-            text-transparent
-          ">
-            {" "}Voice Recording
-          </span>
+        <div className={`
+          flex
+          size-14
+          items-center
+          justify-center
+          rounded-full
+          ${isRecording ? "animate-pulse bg-red-600 text-white" : "bg-zinc-800 text-zinc-300"}
+        `}>
+          <Mic className="size-6" aria-hidden="true" />
+        </div>
 
-        </h2>
+        {/* TIMER */}
+        <p
+          role="timer"
+          className="mt-4 text-3xl font-semibold tabular-nums"
+        >
+          {formatTime(recordingTime)}
+        </p>
 
-        <p className="
-          text-zinc-400
-          text-lg
-          max-w-2xl
-          mx-auto
-          leading-8
-        ">
-
-          Record your voice directly from browser and
-          instantly generate AI-powered transcriptions.
-
+        <p className="mt-1 text-sm text-zinc-500">
+          {
+            isRecording
+              ? "Recording"
+              : loading
+                ? "Transcribing"
+                : "Ready"
+          }
         </p>
 
       </div>
 
-      {/* RECORDING AREA */}
-      <div className="
-        bg-black/40
-        border
-        border-zinc-800
-        rounded-3xl
-        p-5
-        sm:p-10
-        text-center
-      ">
+      {/* BUTTONS */}
+      <div className="mt-4 flex flex-col gap-2 sm:flex-row">
 
-        {/* MIC ANIMATION */}
-        <div className="
-          flex
-          justify-center
-          mb-8
-        ">
-
-          <div className={`
-            relative
-            w-32
-            h-32
-            rounded-full
-            flex
-            items-center
-            justify-center
-            transition-all
-            duration-300
-            ${
-              isRecording
-                ? "bg-red-500 animate-pulse scale-110"
-                : "bg-zinc-800"
-            }
-          `}>
-
-            <span className="text-5xl">
-              🎙️
-            </span>
-
-            {
-              isRecording && (
-                <div className="
-                  absolute
-                  inset-0
-                  rounded-full
-                  border-4
-                  border-red-400
-                  animate-ping
-                " />
-              )
-            }
-
-          </div>
-
-        </div>
-
-        {/* TIMER */}
-        <div className="mb-8">
-
-          <p className="
-            text-5xl
-            font-black
-            tracking-wider
-          ">
-
-            {formatTime(recordingTime)}
-
-          </p>
-
-          <p className="text-zinc-500 mt-2">
-            Recording Timer
-          </p>
-
-        </div>
-
-        {/* BUTTON */}
         {
-          !isRecording ? (
+          isRecording ? (
 
-            <button
-              onClick={startRecording}
-              disabled={loading}
-              className="
-                bg-white
-                text-black
-                px-6
-                sm:px-10
-                py-4
-                rounded-2xl
-                font-bold
-                text-lg
-                hover:scale-105
-                transition
-                disabled:opacity-50
-                disabled:cursor-not-allowed
-                shadow-xl
-              "
-            >
-              Start Recording
-            </button>
+            <>
+
+              <button
+                onClick={stopRecording}
+                className="btn btn-danger flex-1"
+              >
+                <Square className="size-4" aria-hidden="true" />
+                Stop and transcribe
+              </button>
+
+              <button
+                onClick={resetRecording}
+                className="btn btn-secondary"
+              >
+                <Trash2 className="size-4" aria-hidden="true" />
+                Discard
+              </button>
+
+            </>
 
           ) : (
 
-            <button
-              onClick={stopRecording}
-              className="
-                bg-red-500
-                text-white
-                px-6
-                sm:px-10
-                py-4
-                rounded-2xl
-                font-bold
-                text-lg
-                hover:scale-105
-                transition
-                shadow-xl
-              "
-            >
-              Stop Recording
-            </button>
-          )
-        }
+            <>
 
-        {/* STATUS */}
-        {
-          isRecording && (
+              <button
+                onClick={startRecording}
+                disabled={loading}
+                className="btn btn-primary flex-1"
+              >
 
-            <p className="
-              text-red-400
-              mt-6
-              animate-pulse
-              text-lg
-            ">
-              Recording in progress...
-            </p>
-          )
-        }
+                {
+                  loading
+                    ? <Loader2 className="size-4 animate-spin" aria-hidden="true" />
+                    : <Mic className="size-4" aria-hidden="true" />
+                }
 
-        {
-          loading && (
+                {loading ? "Transcribing..." : "Start recording"}
 
-            <p className="
-              text-blue-400
-              mt-6
-              animate-pulse
-              text-lg
-            ">
-              AI is generating transcription...
-            </p>
+              </button>
+
+              {
+                canReset && (
+
+                  <button
+                    onClick={resetRecording}
+                    className="btn btn-secondary"
+                  >
+                    <RotateCcw className="size-4" aria-hidden="true" />
+                    Reset
+                  </button>
+                )
+              }
+
+            </>
           )
         }
 
       </div>
+
+      {/* ERROR */}
+      {
+        error && (
+          <p className="alert-error mt-4">
+            {error}
+          </p>
+        )
+      }
 
       {/* AUDIO PLAYER */}
       {
         audioURL && (
 
-          <div className="
-            mt-10
-            bg-black/40
-            border
-            border-zinc-800
-            rounded-3xl
-            p-6
-          ">
-
-            <h3 className="
-              text-2xl
-              font-bold
-              mb-5
-            ">
-              Recorded Audio
-            </h3>
-
-            <audio
-              controls
-              src={audioURL}
-              className="w-full"
-            />
-
-          </div>
+          <audio
+            controls
+            src={audioURL}
+            aria-label="Recorded audio"
+            className="mt-4 w-full"
+          />
         )
       }
 
       {/* TRANSCRIPT */}
-      {
-        transcript && (
+      {transcript && <TranscriptResult text={transcript} />}
 
-          <div className="
-            mt-10
-            bg-black/40
-            border
-            border-zinc-800
-            rounded-3xl
-            p-8
-          ">
-
-            <div className="
-              flex
-              flex-col
-              md:flex-row
-              md:items-center
-              md:justify-between
-              gap-4
-              mb-6
-            ">
-
-              <div>
-
-                <h3 className="
-                  text-3xl
-                  font-black
-                ">
-                  Recorded Transcript
-                </h3>
-
-                <p className="text-zinc-500 mt-2">
-                  Generated successfully
-                </p>
-
-              </div>
-
-              <button
-                onClick={handleCopy}
-                className="
-                  bg-blue-500/10
-                  text-blue-400
-                  border
-                  border-blue-500/20
-                  px-6
-                  py-3
-                  rounded-2xl
-                  hover:bg-blue-500/20
-                  transition
-                "
-              >
-                Copy Transcript
-              </button>
-
-            </div>
-
-            <div className="
-              bg-zinc-950
-              border
-              border-zinc-800
-              rounded-2xl
-              p-6
-            ">
-
-              <p className="
-                text-zinc-300
-                leading-9
-                whitespace-pre-wrap
-              ">
-                {transcript}
-              </p>
-
-            </div>
-
-          </div>
-        )
-      }
-
-    </div>
+    </section>
   )
 }
 

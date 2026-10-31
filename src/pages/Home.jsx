@@ -8,342 +8,55 @@ import {
   SignedOut,
 } from "@clerk/clerk-react"
 
+import { FileAudio, Globe, History, Mic } from "lucide-react"
+
+const FEATURES = [
+  {
+    icon: FileAudio,
+    title: "Upload audio",
+    text: "MP3, WAV, WEBM, M4A, AAC, OGG and FLAC files up to 100 MB.",
+  },
+  {
+    icon: Mic,
+    title: "Record in the browser",
+    text: "Use your microphone, play the recording back, and reset to try again.",
+  },
+  {
+    icon: Globe,
+    title: "Language detection",
+    text: "The spoken language is detected automatically for each file.",
+  },
+  {
+    icon: History,
+    title: "Saved history",
+    text: "Search, copy or delete your transcripts. Only your account can see them.",
+  },
+]
+
 function Home() {
 
   return (
 
-    <div className="min-h-screen bg-black text-white overflow-hidden relative">
-
-      {/* BACKGROUND GLOW */}
-      <div className="absolute inset-0 -z-10">
-
-        <div className="
-          absolute
-          top-0
-          left-1/4
-          w-72
-          sm:w-96
-          h-72
-          sm:h-96
-          bg-purple-500/20
-          blur-3xl
-          rounded-full
-        " />
-
-        <div className="
-          absolute
-          bottom-0
-          right-1/4
-          w-72
-          sm:w-96
-          h-72
-          sm:h-96
-          bg-blue-500/20
-          blur-3xl
-          rounded-full
-        " />
-
-      </div>
-
-      {/* HERO SECTION */}
-      <section className="
-        flex
-        flex-col
-        items-center
-        justify-center
-        text-center
-        py-24
-        sm:py-32
-        px-4
-        sm:px-6
-      ">
-
-        {/* BADGE */}
-        <div className="
-          border
-          border-zinc-800
-          bg-zinc-900/60
-          backdrop-blur-xl
-          px-5
-          py-2
-          rounded-full
-          mb-8
-        ">
-
-          <p className="
-            text-xs
-            sm:text-sm
-            text-zinc-300
-          ">
-            AI Powered Speech-To-Text Platform
-          </p>
-
-        </div>
-
-        {/* TITLE */}
-        <h1 className="
-          text-5xl
-          sm:text-6xl
-          md:text-8xl
-          font-black
-          leading-tight
-          max-w-5xl
-        ">
-
-          Convert Voice Into
-
-          <span className="
-            bg-gradient-to-r
-            from-purple-400
-            to-blue-400
-            bg-clip-text
-            text-transparent
-          ">
-            {" "}Smart Text
-          </span>
-
-        </h1>
-
-        {/* DESCRIPTION */}
-        <p className="
-          text-zinc-400
-          text-base
-          sm:text-lg
-          md:text-xl
-          mt-8
-          max-w-3xl
-          leading-8
-          sm:leading-9
-        ">
-
-          Upload audio or record your voice and generate
-          accurate AI-powered transcriptions instantly with
-          secure cloud-based history and authentication.
-
-        </p>
-
-        {/* BUTTONS */}
-        <div className="
-          flex
-          flex-col
-          sm:flex-row
-          gap-5
-          mt-12
-          w-full
-          sm:w-auto
-        ">
-
-          <SignedIn>
-
-            <a
-              href="#transcribe"
-              className="
-                w-full
-                sm:w-auto
-                bg-white
-                text-black
-                px-8
-                py-4
-                rounded-2xl
-                font-semibold
-                hover:scale-105
-                transition
-                shadow-2xl
-              "
-            >
-              Start Transcribing
-            </a>
-
-          </SignedIn>
-
-          <SignedOut>
-
-            <Link
-              to="/login"
-              className="
-                w-full
-                sm:w-auto
-                bg-white
-                text-black
-                px-8
-                py-4
-                rounded-2xl
-                font-semibold
-                hover:scale-105
-                transition
-                shadow-2xl
-              "
-            >
-              Start Transcribing
-            </Link>
-
-          </SignedOut>
-
-          <a
-            href="#features"
-            className="
-              w-full
-              sm:w-auto
-              border
-              border-zinc-700
-              bg-zinc-900/60
-              backdrop-blur-xl
-              px-8
-              py-4
-              rounded-2xl
-              hover:bg-zinc-800
-              transition
-            "
-          >
-            Explore Features
-          </a>
-
-        </div>
-
-      </section>
-
-      {/* FEATURES SECTION */}
-      <section id="features" className="
-        scroll-mt-24
-        max-w-7xl
-        mx-auto
-        grid
-        grid-cols-1
-        md:grid-cols-3
-        gap-8
-        px-4
-        sm:px-6
-        pb-24
-      ">
-
-        {/* FEATURE 1 */}
-        <div className="
-          bg-zinc-900/60
-          backdrop-blur-xl
-          border
-          border-zinc-800
-          rounded-3xl
-          p-8
-          hover:border-purple-500/30
-          hover:-translate-y-2
-          transition
-          duration-300
-        ">
-
-          <div className="
-            w-14
-            h-14
-            rounded-2xl
-            bg-purple-500/10
-            flex
-            items-center
-            justify-center
-            mb-6
-            text-2xl
-          ">
-            🎵
-          </div>
-
-          <h2 className="text-2xl font-bold mb-4">
-            Audio Upload
-          </h2>
-
-          <p className="text-zinc-400 leading-8">
-            Upload MP3, WAV, WEBM, M4A, AAC, OGG or FLAC audio
-            files and generate high-quality AI transcriptions.
-          </p>
-
-        </div>
-
-        {/* FEATURE 2 */}
-        <div className="
-          bg-zinc-900/60
-          backdrop-blur-xl
-          border
-          border-zinc-800
-          rounded-3xl
-          p-8
-          hover:border-blue-500/30
-          hover:-translate-y-2
-          transition
-          duration-300
-        ">
-
-          <div className="
-            w-14
-            h-14
-            rounded-2xl
-            bg-blue-500/10
-            flex
-            items-center
-            justify-center
-            mb-6
-            text-2xl
-          ">
-            🎙️
-          </div>
-
-          <h2 className="text-2xl font-bold mb-4">
-            Live Recording
-          </h2>
-
-          <p className="text-zinc-400 leading-8">
-            Record your voice directly from browser using
-            the MediaRecorder API and get an AI transcript.
-          </p>
-
-        </div>
-
-        {/* FEATURE 3 */}
-        <div className="
-          bg-zinc-900/60
-          backdrop-blur-xl
-          border
-          border-zinc-800
-          rounded-3xl
-          p-8
-          hover:border-green-500/30
-          hover:-translate-y-2
-          transition
-          duration-300
-        ">
-
-          <div className="
-            w-14
-            h-14
-            rounded-2xl
-            bg-green-500/10
-            flex
-            items-center
-            justify-center
-            mb-6
-            text-2xl
-          ">
-            🤖
-          </div>
-
-          <h2 className="text-2xl font-bold mb-4">
-            AI Transcription
-          </h2>
-
-          <p className="text-zinc-400 leading-8">
-            Powered by advanced AI speech recognition for
-            accurate and fast voice-to-text conversion.
-          </p>
-
-        </div>
-
-      </section>
+    <>
 
       {/* AUTHENTICATED USER */}
       <SignedIn>
 
-        <div id="transcribe" className="scroll-mt-24 pb-20 px-4 sm:px-6">
-          <UploadBox />
-        </div>
+        <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6">
 
-        <div className="pb-24 px-4 sm:px-6">
-          <Recorder />
+          <h1 className="text-2xl font-semibold tracking-tight sm:text-3xl">
+            New transcript
+          </h1>
+
+          <p className="mt-2 text-zinc-400">
+            Upload a file or record audio. Finished transcripts are saved to your history.
+          </p>
+
+          <div className="mt-8 grid items-start gap-6 lg:grid-cols-2">
+            <UploadBox />
+            <Recorder />
+          </div>
+
         </div>
 
       </SignedIn>
@@ -351,36 +64,63 @@ function Home() {
       {/* LOGGED OUT */}
       <SignedOut>
 
-        <div className="
-          text-center
-          py-20
-          border-t
-          border-zinc-900
-          px-4
-        ">
+        <div className="mx-auto max-w-6xl px-4 sm:px-6">
 
-          <h2 className="
-            text-3xl
-            sm:text-4xl
-            font-bold
-            mb-5
-          ">
-            Login Required
-          </h2>
+          {/* HERO SECTION */}
+          <section className="mx-auto max-w-3xl py-20 text-center sm:py-28">
 
-          <p className="
-            text-zinc-400
-            text-base
-            sm:text-lg
-          ">
-            Please login to upload and transcribe audio.
-          </p>
+            <h1 className="text-4xl font-semibold tracking-tight text-balance sm:text-6xl">
+              Turn speech into text
+            </h1>
+
+            <p className="mx-auto mt-6 max-w-xl text-lg leading-8 text-zinc-400">
+              Upload an audio file or record from your browser, and keep
+              every transcript in one place.
+            </p>
+
+            <div className="mt-10 flex flex-col justify-center gap-3 sm:flex-row">
+
+              <Link to="/register" className="btn btn-primary px-6 py-3">
+                Get started
+              </Link>
+
+              <Link to="/login" className="btn btn-secondary px-6 py-3">
+                Sign in
+              </Link>
+
+            </div>
+
+          </section>
+
+          {/* FEATURES SECTION */}
+          <section className="grid gap-4 pb-20 sm:grid-cols-2 lg:grid-cols-4">
+
+            {
+              FEATURES.map((feature) => (
+
+                <div key={feature.title} className="card p-5">
+
+                  <feature.icon className="size-5 text-zinc-400" aria-hidden="true" />
+
+                  <h2 className="mt-4 font-medium">
+                    {feature.title}
+                  </h2>
+
+                  <p className="mt-2 text-sm leading-6 text-zinc-400">
+                    {feature.text}
+                  </p>
+
+                </div>
+              ))
+            }
+
+          </section>
 
         </div>
 
       </SignedOut>
 
-    </div>
+    </>
   )
 }
 

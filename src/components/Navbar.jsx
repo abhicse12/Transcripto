@@ -1,6 +1,4 @@
-import { useState } from "react"
-
-import { Link, useLocation } from "react-router-dom"
+import { Link, NavLink } from "react-router-dom"
 
 import {
   SignedIn,
@@ -8,83 +6,41 @@ import {
   UserButton,
 } from "@clerk/clerk-react"
 
+import { AudioLines } from "lucide-react"
+
+const navLinkClass = ({ isActive }) => `
+  rounded-lg px-3 py-2 text-sm font-medium transition-colors
+  ${isActive ? "bg-zinc-800 text-white" : "text-zinc-400 hover:text-white"}
+`
+
 function Navbar() {
-
-  const location = useLocation()
-
-  const [menuOpen, setMenuOpen] = useState(false)
-
-  const navLinks = [
-    {
-      name: "Home",
-      path: "/",
-    },
-    {
-      name: "History",
-      path: "/history",
-    },
-  ]
 
   return (
 
-    <nav className="sticky top-0 z-50 border-b border-zinc-800/50 bg-black/70 backdrop-blur-xl">
+    <nav className="sticky top-0 z-50 border-b border-zinc-800 bg-zinc-950/90 backdrop-blur">
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between gap-4">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between gap-3 px-4 sm:px-6">
 
         {/* LOGO */}
         <Link
           to="/"
-          className="text-2xl sm:text-3xl font-black tracking-tight"
+          className="flex items-center gap-2 text-lg font-semibold tracking-tight"
         >
-
-          <span className="bg-gradient-to-r from-purple-400 to-blue-400 bg-clip-text text-transparent">
-            Transcripto
-          </span>
-
-          <span className="text-white">
-            AI
-          </span>
-
+          <AudioLines className="size-5" aria-hidden="true" />
+          <span className="max-[359px]:sr-only">Transcripto</span>
         </Link>
 
-        {/* DESKTOP NAV */}
-        <div className="hidden md:flex items-center gap-3">
-
-          {
-            navLinks.map((link) => (
-
-              <Link
-                key={link.path}
-                to={link.path}
-                className={`
-                  px-5 py-2 rounded-xl transition font-medium
-                  ${
-                    location.pathname === link.path
-                      ? "bg-zinc-800 text-white"
-                      : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
-                  }
-                `}
-              >
-                {link.name}
-              </Link>
-            ))
-          }
+        <div className="flex items-center gap-1 sm:gap-2">
 
           {/* LOGGED OUT */}
           <SignedOut>
 
-            <Link
-              to="/login"
-              className="text-zinc-400 hover:text-white transition px-4"
-            >
-              Login
+            <Link to="/login" className="btn text-zinc-300 hover:text-white">
+              Sign in
             </Link>
 
-            <Link
-              to="/register"
-              className="bg-white text-black px-5 py-2 rounded-xl font-semibold hover:scale-105 transition"
-            >
-              Get Started
+            <Link to="/register" className="btn btn-primary">
+              Get started
             </Link>
 
           </SignedOut>
@@ -92,110 +48,23 @@ function Navbar() {
           {/* LOGGED IN */}
           <SignedIn>
 
-            <div className="ml-3 border border-zinc-800 rounded-full p-1 bg-zinc-900/60">
+            <NavLink to="/" end className={navLinkClass}>
+              Transcribe
+            </NavLink>
 
-              <UserButton
-                appearance={{
-                  elements: {
-                    avatarBox: {
-                      width: "40px",
-                      height: "40px",
-                    },
-                  },
-                }}
-              />
+            <NavLink to="/history" className={navLinkClass}>
+              History
+            </NavLink>
 
+            <div className="ml-2 flex items-center">
+              <UserButton />
             </div>
 
           </SignedIn>
 
         </div>
 
-        {/* MOBILE MENU BUTTON */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          className="md:hidden text-3xl text-white"
-        >
-          {menuOpen ? "✕" : "☰"}
-        </button>
-
       </div>
-
-      {/* MOBILE MENU */}
-      {
-        menuOpen && (
-
-          <div className="md:hidden border-t border-zinc-800 bg-black/95 backdrop-blur-xl px-4 py-6 flex flex-col gap-4">
-
-            {
-              navLinks.map((link) => (
-
-                <Link
-                  key={link.path}
-                  to={link.path}
-                  onClick={() => setMenuOpen(false)}
-                  className={`
-                    px-5 py-3 rounded-xl transition font-medium text-center
-                    ${
-                      location.pathname === link.path
-                        ? "bg-zinc-800 text-white"
-                        : "text-zinc-400 hover:bg-zinc-900 hover:text-white"
-                    }
-                  `}
-                >
-                  {link.name}
-                </Link>
-              ))
-            }
-
-            {/* LOGGED OUT */}
-            <SignedOut>
-
-              <Link
-                to="/login"
-                onClick={() => setMenuOpen(false)}
-                className="text-zinc-400 hover:text-white transition text-center py-2"
-              >
-                Login
-              </Link>
-
-              <Link
-                to="/register"
-                onClick={() => setMenuOpen(false)}
-                className="bg-white text-black px-5 py-3 rounded-xl font-semibold text-center"
-              >
-                Get Started
-              </Link>
-
-            </SignedOut>
-
-            {/* LOGGED IN */}
-            <SignedIn>
-
-              <div className="flex justify-center pt-2">
-
-                <div className="border border-zinc-800 rounded-full p-1 bg-zinc-900/60">
-
-                  <UserButton
-                    appearance={{
-                      elements: {
-                        avatarBox: {
-                          width: "42px",
-                          height: "42px",
-                        },
-                      },
-                    }}
-                  />
-
-                </div>
-
-              </div>
-
-            </SignedIn>
-
-          </div>
-        )
-      }
 
     </nav>
   )
